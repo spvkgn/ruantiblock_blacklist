@@ -1,0 +1,61 @@
+name: Update ruantiblock blacklist
+run-name: Blacklist updating
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '37 22 * * *'
+
+jobs:
+  update:
+    name: blacklist ${{ matrix.version }} ${{ matrix.type }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        version: ['0.9', '1.0', '1.1']
+        type: [fqdn, ip]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Create blacklist
+        shell: bash
+        env:
+          VERSION: ${{ matrix.version }}
+          TYPE: ${{ matrix.type }}
+        run: |
+          BL_DIR=blacklist-$VERSION/$TYPE
+          mkdir -p $BL_DIR
+          ( cd ./$VERSION ; ./run_parser.sh ./ruantiblock_$TYPE.conf ../$BL_DIR )
+          ls -1sh $BL_DIR ; tar cvf ${BL_DIR//\//-}.tar --transform "s|^\./|$BL_DIR/|" -C ./$BL_DIR .
+      - uses: actions/upload-artifact@v3
+        with:
+          name: blacklist-${{ matrix.version }}-${{ matrix.type }}
+          path: blacklist-${{ matrix.version }}-${{ matrix.type }}.tar
+          if-no-files-found: error
+          retention-days: 7
+
+  gh-pages:
+    needs: update
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v3
+      - run: |
+          mkdir public
+          find . -name 'blacklist-*.tar' -exec tar xvf {} -C ./public \;
+          ls -1R public
+          echo DATE=$(date --utc "+%Y-%m-%d %H:%M %Z") >> $GITHUB_ENV
+      - name: Deploy to GH pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
+          full_commit_message: "Updated: ${{ env.DATE }}"
+          force_orphan: false
+      - name: Delete workflow runs
+        uses: Mattraks/delete-workflow-runs@v2
+        continue-on-error: true
