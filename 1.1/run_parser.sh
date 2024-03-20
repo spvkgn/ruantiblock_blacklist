@@ -46,7 +46,7 @@ BLLIST_MODULE="${MODULES_DIR}/ruab_parser.py"
 
 ############################## Parsers #################################
 
-### Режим обхода блокировок: zapret-info-fqdn, zapret-info-ip, rublacklist-fqdn, rublacklist-ip, antifilter-ip, ruantiblock-fqdn, ruantiblock-ip
+### Режим обхода блокировок: zapret-info-fqdn, zapret-info-ip, rublacklist-fqdn, rublacklist-ip, antifilter-ip, fz-fqdn, fz-ip, ruantiblock-fqdn, ruantiblock-ip
 export BLLIST_PRESET=""
 ### В случае если из источника получено менее указанного кол-ва записей, то обновления списков не происходит
 export BLLIST_MIN_ENTRIES=30000
@@ -92,6 +92,7 @@ export RBL_DPI_URL="https://reestr.rublacklist.net/api/v3/dpi/"
 export ZI_ALL_URL="https://raw.githubusercontent.com/zapret-info/z-i/master/dump.csv"
 export AF_IP_URL="https://antifilter.download/list/allyouneed.lst"
 export AF_FQDN_URL="https://antifilter.download/list/domains.lst"
+export FZ_URL="https://raw.githubusercontent.com/fz139/vigruzki/main/dump.xml.00 https://raw.githubusercontent.com/fz139/vigruzki/main/dump.xml.01 https://raw.githubusercontent.com/fz139/vigruzki/main/dump.xml.02"
 # export RA_IP_NFTSET_URL="https://raw.githubusercontent.com/gSpotx2f/ruantiblock_blacklist/master/blacklist/ip/ruantiblock.ip"
 # export RA_IP_DMASK_URL="https://raw.githubusercontent.com/gSpotx2f/ruantiblock_blacklist/master/blacklist/ip/ruantiblock.dnsmasq"
 # export RA_IP_STAT_URL="https://raw.githubusercontent.com/gSpotx2f/ruantiblock_blacklist/master/blacklist/ip/update_status"
@@ -101,6 +102,7 @@ export AF_FQDN_URL="https://antifilter.download/list/domains.lst"
 export RBL_ENCODING=""
 export ZI_ENCODING="CP1251"
 export AF_ENCODING=""
+export FZ_ENCODING="CP1251"
 # export RA_ENCODING=""
 
 ############################ Configuration #############################
@@ -130,6 +132,14 @@ case "$BLLIST_PRESET" in
     antifilter-ip)
         export BLLIST_SOURCE="antifilter"
         export BLLIST_MODE="ip"
+    ;;
+    fz-ip)
+        export BLLIST_SOURCE="fz"
+        export BLLIST_MODE="ip"
+    ;;
+    fz-fqdn)
+        export BLLIST_SOURCE="fz"
+        export BLLIST_MODE="fqdn"
     ;;
 #     ruantiblock-ip)
 #         export BLLIST_SOURCE="ruantiblock"
@@ -267,8 +277,8 @@ GetDataFiles() {
             [ $_attempt -gt $MODULE_RUN_ATTEMPTS ] && break
             sleep $MODULE_RUN_TIMEOUT
         done
-        AddUserEntries
         if [ $_return_code -eq 0 ]; then
+            AddUserEntries
             _update_string=`$AWK_CMD '{
                 printf "Received entries: %s\n", (NF < 3) ? "No data" : "CIDR: "$1", IP: "$2", FQDN: "$3;
                 exit;
