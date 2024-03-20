@@ -221,8 +221,8 @@ GetDataFiles() {
             [ $_attempt -gt $MODULE_RUN_ATTEMPTS ] && break
             sleep $MODULE_RUN_TIMEOUT
         done
-        AddUserEntries
         if [ $_return_code -eq 0 ]; then
+            AddUserEntries
             _update_string=`$AWK_CMD '{
                 printf "Received entries: %s\n", (NF < 3) ? "No data" : "CIDR: "$1", IP: "$2", FQDN: "$3;
                 exit;
