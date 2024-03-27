@@ -30,7 +30,7 @@ jobs:
           BL_DIR=blacklist-$VERSION/$TYPE
           mkdir -p $BL_DIR
           ( cd ./$VERSION ; ./run_parser.sh ./ruantiblock_$TYPE.conf ../$BL_DIR )
-          ls -1sh $BL_DIR ; tar cvf ${BL_DIR//\//-}.tar --transform "s|^\./|$BL_DIR/|" -C ./$BL_DIR .
+          tar cvf ${BL_DIR//\//-}.tar --transform "s|^\./|$BL_DIR/|" -C ./$BL_DIR .
 
       - uses: actions/upload-artifact@v4
         with:
@@ -40,7 +40,6 @@ jobs:
           retention-days: 7
 
   gh-pages:
-    # if: ${{ false }} # disable for now
     needs: update
     permissions:
       contents: write
