@@ -6,6 +6,7 @@ ipset=/rutracker.org/rd
 ipset=/rutracker.net/rd
 ipset=/rutracker.nl/rd
 ipset=/rutracker.cc/rd
+ipset=/nnmclub.to/rd
 ipset=/www.eporner.com/rd
 ipset=/narkive.com/rd
 ipset=/musicbrainz.org/rd
