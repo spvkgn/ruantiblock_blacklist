@@ -16,3 +16,6 @@ ipset=/vpngate.net/rd
 ipset=/vpnlove.me/rd
 ipset=/phncdn.com/rd
 ipset=/googlevideo.com/rd
+ipset=/youtube.com/rd
+ipset=/youtu.be/rd
+ipset=/ytimg.com/rd
