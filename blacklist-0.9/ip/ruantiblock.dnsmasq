@@ -16,7 +16,6 @@ ipset=/rutracker.org/rd
 ipset=/rutracker.net/rd
 ipset=/rutracker.nl/rd
 ipset=/rutracker.cc/rd
-ipset=/t-ru.org/rd
 ipset=/googlevideo.com/rd
 ipset=/nhacmp3youtube.com/rd
 ipset=/wide-youtube.l.google.com/rd
