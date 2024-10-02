@@ -8,6 +8,7 @@ ipset=/vpngate.net/rd
 ipset=/vpnlove.me/rd
 ipset=/phncdn.com/rd
 ipset=/ntc.party/rd
+ipset=/proton.me/rd
 ipset=/rutracker.org/rd
 ipset=/rutracker.net/rd
 ipset=/rutracker.nl/rd
