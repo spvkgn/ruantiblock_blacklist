@@ -149,6 +149,7 @@ profit
 birds
 kraken
 feya
+flibusta
 #lord
 ^[0-9]{4,}|[0-9]{4,}\.|-[0-9]+|[0-9]+-
 \.(best|center|click|cloud|date|guru|host|fm|fun|icu|love|me|ml|mobi|pro|site|space|one|online|top|life|rocks|win|world|xyz|vip)$
