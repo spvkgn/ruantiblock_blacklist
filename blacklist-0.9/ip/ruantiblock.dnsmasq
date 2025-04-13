@@ -18,4 +18,7 @@ ipset=/rutracker.org/rd
 ipset=/rutracker.net/rd
 ipset=/rutracker.nl/rd
 ipset=/rutracker.cc/rd
+ipset=/rezka.ag/rd
+ipset=/hdrezka.ag/rd
+ipset=/hdrezka.in/rd
 ipset=/vpngate.net/rd
