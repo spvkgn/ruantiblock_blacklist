@@ -21,5 +21,6 @@ ipset=/rutracker.cc/rd
 ipset=/rezka.ag/rd
 ipset=/hdrezka.ag/rd
 ipset=/hdrezka.in/rd
+ipset=/musicbrainz.org/rd
 ipset=/vpngate.net/rd
 ipset=/nerdvpn.de/rd
