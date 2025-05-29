@@ -8,6 +8,7 @@
 """
 
 from contextlib import contextmanager
+import gzip
 import os
 import re
 import socket
@@ -203,19 +204,41 @@ class BlackListParser(Config):
             if conn_object:
                 conn_object.close()
 
+    def _handle_gzip(self, fileobj):
+        try:
+            with gzip.GzipFile(fileobj=fileobj) as gz_file:
+                while True:
+                    chunk = gz_file.read(self.data_chunk)
+                    yield (chunk or None)
+                    if not chunk:
+                        break
+        except gzip.BadGzipFile:
+            fileobj.seek(0)
+            while True:
+                chunk = fileobj.read(self.data_chunk)
+                yield (chunk or None)
+                if not chunk:
+                    break
+
     def _download_data(self):
         with self._make_connection(
             self.url,
             send_headers_dict=self.send_headers_dict,
             timeout=self.connect_timeout
         ) as conn_params:
-            conn_object, http_code, _ = conn_params
+            conn_object, http_code, headers = conn_params
             if http_code == 200:
-                while True:
-                    chunk = conn_object.read(self.data_chunk)
-                    yield (chunk or None)
-                    if not chunk:
-                        break
+                is_gzip = (self.url.endswith('.gz') or
+                         any(h[0].lower() == 'content-type' and
+                             'gzip' in h[1].lower() for h in headers))
+                if is_gzip:
+                    yield from self._handle_gzip(conn_object)
+                else:
+                    while True:
+                        chunk = conn_object.read(self.data_chunk)
+                        yield (chunk or None)
+                        if not chunk:
+                            break
 
     def _align_chunk(self):
         rest = bytes()

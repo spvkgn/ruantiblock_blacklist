@@ -81,7 +81,7 @@ export BLLIST_ALT_DNS_ADDR="8.8.8.8"
 ### Источники блэклиста
 export RBL_ALL_URL="https://reestr.rublacklist.net/api/v3/snapshot/"
 export RBL_IP_URL="https://reestr.rublacklist.net/api/v3/ips/"
-export ZI_ALL_URL="https://raw.githubusercontent.com/zapret-info/z-i/master/dump.csv"
+export ZI_ALL_URL="https://raw.githubusercontent.com/zapret-info/z-i/master/dump.csv.gz"
 export AF_IP_URL="https://antifilter.download/list/allyouneed.lst"
 export AF_FQDN_URL="https://antifilter.download/list/domains.lst"
 # export RA_IP_IPSET_URL="https://raw.githubusercontent.com/gSpotx2f/ruantiblock_blacklist/master/blacklist/ip/ruantiblock.ip"
