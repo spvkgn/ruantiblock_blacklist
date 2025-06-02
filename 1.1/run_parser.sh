@@ -18,18 +18,18 @@ export MODULES_DIR="."
 
 ########################## Default Settings ############################
 
-### Запись событий в syslog (0 - выкл, 1 - вкл)
+### Запись событий в syslog (0 - off, 1 - on)
 export ENABLE_LOGGING=1
 ### Максимальное кол-во элементов списка nftables
 export NFTSET_MAXELEM_CIDR=65535
 export NFTSET_MAXELEM_IP=1000000
-#export NFTSET_MAXELEM_DNSMASQ=65535
+export NFTSET_MAXELEM_DNSMASQ=65535
 ### Политика отбора элементов в сетах nftables. "performance" - производительность и большее потребление RAM. "memory" - хуже производительность и меньше потребление RAM
 export NFTSET_POLICY_CIDR="memory"
 export NFTSET_POLICY_IP="memory"
-#export NFTSET_POLICY_DNSMASQ="performance"
-### Добавление в список блокировок пользовательских записей из файла $USER_ENTRIES_FILE (0 - выкл, 1 - вкл)
-###  В $DATA_DIR можно создать текстовый файл user_entries с записями IP, CIDR или FQDN (одна на строку). Эти записи будут добавлены в список блокировок
+export NFTSET_POLICY_DNSMASQ="performance"
+### Добавление в список блокировок пользовательских записей из файла $USER_ENTRIES_FILE (0 - off, 1 - on)
+###  В $CONFIG_DIR можно создать текстовый файл user_entries с записями IP, CIDR или FQDN (одна на строку). Эти записи будут добавлены в список блокировок
 ###  В записях FQDN можно задать DNS-сервер для разрешения данного домена, через пробел (прим.: domain.com 8.8.8.8)
 ###  Можно комментировать строки (#)
 export ADD_USER_ENTRIES=0
@@ -59,61 +59,48 @@ BLLIST_MODULE="${MODULES_DIR}/ruab_parser.py"
 export BLLIST_PRESET=""
 ### В случае если из источника получено менее указанного кол-ва записей, то обновления списков не происходит
 export BLLIST_MIN_ENTRIES=30000
-### Лимит IP адресов. При достижении, в конфиг ipset будет добавлена вся подсеть /24 вместо множества IP адресов пренадлежащих этой сети (0 - выкл)
+### Лимит IP адресов. При достижении, в конфиг ipset будет добавлена вся подсеть /24 вместо множества IP адресов пренадлежащих этой сети (0 - off)
 export BLLIST_IP_LIMIT=0
-### Подсети класса C (/24). IP адреса из этих подсетей не группируются при оптимизации (записи д.б. в виде: 68.183.221. 149.154.162. и пр.). Прим.: "68.183.221. 149.154.162."
-export BLLIST_GR_EXCLUDED_NETS=""
+### Файл с подсетями класса C (/24). IP адреса из этих подсетей не группируются при оптимизации (записи д.б. в виде: 68.183.221. 149.154.162. и пр. Одна запись на строку)
+export BLLIST_GR_EXCLUDED_NETS_FILE="${CONFIG_DIR}/gr_excluded_nets"
 ### Группировать идущие подряд IP адреса в подсетях /24 в диапазоны CIDR
 export BLLIST_SUMMARIZE_IP=0
 ### Группировать идущие подряд подсети /24 в диапазоны CIDR
 export BLLIST_SUMMARIZE_CIDR=0
-### Фильтрация записей блэклиста по шаблонам из файла BLLIST_IP_FILTER_FILE. Записи (IP, CIDR) попадающие под шаблоны исключаются из кофига ipset (0 - выкл, 1 - вкл)
+### Фильтрация записей блэклиста по шаблонам из файла BLLIST_IP_FILTER_FILE. Записи (IP, CIDR) попадающие под шаблоны исключаются из кофига ipset (0 - off, 1 - on)
 export BLLIST_IP_FILTER=0
 ### Тип фильтра IP (0 - все записи, кроме совпадающих с шаблонами; 1 - только записи, совпадающие с шаблонами)
 export BLLIST_IP_FILTER_TYPE=0
 ### Файл с шаблонами IP для опции BLLIST_IP_FILTER (каждый шаблон в отдельной строке. # в первом символе строки - комментирует строку)
 export BLLIST_IP_FILTER_FILE="${CONFIG_DIR}/ip_filter"
-### Лимит субдоменов для группировки. При достижении, в конфиг dnsmasq будет добавлен весь домен 2-го ур-ня вместо множества субдоменов (0 - выкл)
+### Включение опции исключения IP/CIDR из блэклиста
+export BLLIST_IP_EXCLUDED_ENABLE=0
+### Файл с записями IP/CIDR для опции BLLIST_IP_EXCLUDED_ENABLE
+export BLLIST_IP_EXCLUDED_FILE="${CONFIG_DIR}/ip_excluded"
+### Лимит субдоменов для группировки. При достижении, в конфиг dnsmasq будет добавлен весь домен 2-го ур-ня вместо множества субдоменов (0 - off)
 export BLLIST_SD_LIMIT=0
-### SLD не подлежащие группировке при оптимизации (через пробел)
-export BLLIST_GR_EXCLUDED_SLD=""
-### Не группировать SLD попадающие под выражения (через пробел) ("[.][a-z]{2,3}[.][a-z]{2}$")
-export BLLIST_GR_EXCLUDED_MASKS=""
-### Фильтрация записей блэклиста по шаблонам из файла ENTRIES_FILTER_FILE. Записи (FQDN) попадающие под шаблоны исключаются из кофига dnsmasq (0 - выкл, 1 - вкл)
+### Файл с SLD не подлежащими группировке при оптимизации (одна запись на строку)
+export BLLIST_GR_EXCLUDED_SLD_FILE="${CONFIG_DIR}/gr_excluded_sld"
+### Файл с масками SLD не подлежащими группировке при оптимизации (одна запись на строку)
+export BLLIST_GR_EXCLUDED_SLD_MASKS_FILE="${CONFIG_DIR}/gr_excluded_sld_mask"
+### Фильтрация записей блэклиста по шаблонам из файла ENTRIES_FILTER_FILE. Записи (FQDN) попадающие под шаблоны исключаются из кофига dnsmasq (0 - off, 1 - on)
 export BLLIST_FQDN_FILTER=0
 ### Тип фильтра FQDN (0 - все записи, кроме совпадающих с шаблонами; 1 - только записи, совпадающие с шаблонами)
 export BLLIST_FQDN_FILTER_TYPE=0
 ### Файл с шаблонами FQDN для опции BLLIST_FQDN_FILTER (каждый шаблон в отдельной строке. # в первом символе строки - комментирует строку)
 export BLLIST_FQDN_FILTER_FILE="${CONFIG_DIR}/fqdn_filter"
-### Обрезка www[0-9]. в FQDN (0 - выкл, 1 - вкл)
+### Включение опции исключения FQDN из блэклиста
+export BLLIST_FQDN_EXCLUDED_ENABLE=0
+### Файл с записями FQDN для опции BLLIST_FQDN_EXCLUDED_ENABLE
+export BLLIST_FQDN_EXCLUDED_FILE="${CONFIG_DIR}/fqdn_excluded"
+### Обрезка www[0-9]. в FQDN (0 - off, 1 - on)
 export BLLIST_STRIP_WWW=1
-### Преобразование кириллических доменов в punycode (0 - выкл, 1 - вкл)
+### Преобразование кириллических доменов в punycode (0 - off, 1 - on)
 export BLLIST_ENABLE_IDN=0
-### Перенаправлять DNS-запросы на альтернативный DNS-сервер для заблокированных FQDN (0 - выкл, 1 - вкл)
+### Перенаправлять DNS-запросы на альтернативный DNS-сервер для заблокированных FQDN (0 - off, 1 - on)
 export BLLIST_ALT_NSLOOKUP=0
 ### Альтернативный DNS-сервер
 export BLLIST_ALT_DNS_ADDR="8.8.8.8"
-
-### Источники блэклиста
-export RBL_ALL_URL="https://reestr.rublacklist.net/api/v2/current/csv/"
-export RBL_IP_URL="https://reestr.rublacklist.net/api/v2/ips/csv/"
-export RBL_DPI_URL="https://reestr.rublacklist.net/api/v3/dpi/"
-export ZI_ALL_URL="https://raw.githubusercontent.com/zapret-info/z-i/master/dump.csv"
-#export ZI_ALL_URL="https://app.assembla.com/spaces/z-i/git/source/master/dump.csv?_format=raw"
-export AF_IP_URL="https://antifilter.download/list/allyouneed.lst"
-export AF_FQDN_URL="https://antifilter.download/list/domains.lst"
-export FZ_URL="https://raw.githubusercontent.com/fz139/vigruzki/main/dump.xml.00 https://raw.githubusercontent.com/fz139/vigruzki/main/dump.xml.01 https://raw.githubusercontent.com/fz139/vigruzki/main/dump.xml.02"
-# export RA_IP_IPSET_URL="https://raw.githubusercontent.com/gSpotx2f/ruantiblock_blacklist/master/blacklist/ip/ruantiblock.ip"
-# export RA_IP_DMASK_URL="https://raw.githubusercontent.com/gSpotx2f/ruantiblock_blacklist/master/blacklist/ip/ruantiblock.dnsmasq"
-# export RA_IP_STAT_URL="https://raw.githubusercontent.com/gSpotx2f/ruantiblock_blacklist/master/blacklist/ip/update_status"
-# export RA_FQDN_IPSET_URL="https://raw.githubusercontent.com/gSpotx2f/ruantiblock_blacklist/master/blacklist/fqdn/ruantiblock.ip"
-# export RA_FQDN_DMASK_URL="https://raw.githubusercontent.com/gSpotx2f/ruantiblock_blacklist/master/blacklist/fqdn/ruantiblock.dnsmasq"
-# export RA_FQDN_STAT_URL="https://raw.githubusercontent.com/gSpotx2f/ruantiblock_blacklist/master/blacklist/fqdn/update_status"
-export RBL_ENCODING=""
-export ZI_ENCODING="CP1251"
-export AF_ENCODING=""
-export FZ_ENCODING="CP1251"
-# export RA_ENCODING=""
 
 ############################ Configuration #############################
 
@@ -123,7 +110,26 @@ if [ -n "$1" ]; then
 fi
 [ -f "$CONFIG_FILE" ] && . "$CONFIG_FILE"
 
-### Blacklist source and mode
+### Blacklist sources
+## rublacklist
+export RBL_ALL_URL="https://reestr.rublacklist.net/api/v3/snapshot/"
+export RBL_IP_URL="https://reestr.rublacklist.net/api/v3/ips/"
+export RBL_DPI_URL="https://reestr.rublacklist.net/api/v3/dpi/"
+export RBL_ENCODING=""
+## zapret-info
+#export ZI_ALL_URL="https://raw.githubusercontent.com/zapret-info/z-i/refs/heads/master/dump-00.csv https://raw.githubusercontent.com/zapret-info/z-i/refs/heads/master/dump-01.csv https://raw.githubusercontent.com/zapret-info/z-i/refs/heads/master/dump-02.csv https://raw.githubusercontent.com/zapret-info/z-i/refs/heads/master/dump-03.csv https://raw.githubusercontent.com/zapret-info/z-i/refs/heads/master/dump-04.csv https://raw.githubusercontent.com/zapret-info/z-i/refs/heads/master/dump-05.csv https://raw.githubusercontent.com/zapret-info/z-i/refs/heads/master/dump-06.csv https://raw.githubusercontent.com/zapret-info/z-i/refs/heads/master/dump-07.csv https://raw.githubusercontent.com/zapret-info/z-i/refs/heads/master/dump-08.csv https://raw.githubusercontent.com/zapret-info/z-i/refs/heads/master/dump-09.csv https://raw.githubusercontent.com/zapret-info/z-i/refs/heads/master/dump-10.csv https://raw.githubusercontent.com/zapret-info/z-i/refs/heads/master/dump-11.csv https://raw.githubusercontent.com/zapret-info/z-i/refs/heads/master/dump-12.csv https://raw.githubusercontent.com/zapret-info/z-i/refs/heads/master/dump-13.csv https://raw.githubusercontent.com/zapret-info/z-i/refs/heads/master/dump-14.csv https://raw.githubusercontent.com/zapret-info/z-i/refs/heads/master/dump-15.csv https://raw.githubusercontent.com/zapret-info/z-i/refs/heads/master/dump-16.csv https://raw.githubusercontent.com/zapret-info/z-i/refs/heads/master/dump-17.csv https://raw.githubusercontent.com/zapret-info/z-i/refs/heads/master/dump-18.csv https://raw.githubusercontent.com/zapret-info/z-i/refs/heads/master/dump-19.csv"
+#export ZI_ALL_URL="https://app.assembla.com/spaces/z-i/git/source/master/dump.csv?_format=raw"
+export ZI_ALL_URL="https://sourceforge.net/p/zapret-info/code/HEAD/tree/dump-00.csv?format=raw https://sourceforge.net/p/zapret-info/code/HEAD/tree/dump-01.csv?format=raw https://sourceforge.net/p/zapret-info/code/HEAD/tree/dump-02.csv?format=raw https://sourceforge.net/p/zapret-info/code/HEAD/tree/dump-03.csv?format=raw https://sourceforge.net/p/zapret-info/code/HEAD/tree/dump-04.csv?format=raw https://sourceforge.net/p/zapret-info/code/HEAD/tree/dump-05.csv?format=raw https://sourceforge.net/p/zapret-info/code/HEAD/tree/dump-06.csv?format=raw https://sourceforge.net/p/zapret-info/code/HEAD/tree/dump-07.csv?format=raw https://sourceforge.net/p/zapret-info/code/HEAD/tree/dump-08.csv?format=raw https://sourceforge.net/p/zapret-info/code/HEAD/tree/dump-09.csv?format=raw https://sourceforge.net/p/zapret-info/code/HEAD/tree/dump-10.csv?format=raw https://sourceforge.net/p/zapret-info/code/HEAD/tree/dump-11.csv?format=raw https://sourceforge.net/p/zapret-info/code/HEAD/tree/dump-12.csv?format=raw https://sourceforge.net/p/zapret-info/code/HEAD/tree/dump-13.csv?format=raw https://sourceforge.net/p/zapret-info/code/HEAD/tree/dump-14.csv?format=raw https://sourceforge.net/p/zapret-info/code/HEAD/tree/dump-15.csv?format=raw https://sourceforge.net/p/zapret-info/code/HEAD/tree/dump-16.csv?format=raw https://sourceforge.net/p/zapret-info/code/HEAD/tree/dump-17.csv?format=raw https://sourceforge.net/p/zapret-info/code/HEAD/tree/dump-18.csv?format=raw https://sourceforge.net/p/zapret-info/code/HEAD/tree/dump-19.csv?format=raw"
+export ZI_ENCODING="CP1251"
+## antifilter
+export AF_IP_URL="https://antifilter.download/list/allyouneed.lst"
+export AF_FQDN_URL="https://antifilter.download/list/domains.lst"
+export AF_ENCODING=""
+## fz
+export FZ_URL="https://raw.githubusercontent.com/fz139/vigruzki/main/dump.xml.00 https://raw.githubusercontent.com/fz139/vigruzki/main/dump.xml.01 https://raw.githubusercontent.com/fz139/vigruzki/main/dump.xml.02"
+export FZ_ENCODING="CP1251"
+
+### Blacklist presets
 case "$BLLIST_PRESET" in
     zapret-info-ip)
         ### Источник для обновления списка блокировок (zapret-info, rublacklist, antifilter, fz, ruantiblock)
@@ -155,14 +161,6 @@ case "$BLLIST_PRESET" in
         export BLLIST_SOURCE="fz"
         export BLLIST_MODE="fqdn"
     ;;
-#     ruantiblock-ip)
-#         export BLLIST_SOURCE="ruantiblock"
-#         export BLLIST_MODE="ip"
-#     ;;
-#     ruantiblock-fqdn)
-#         export BLLIST_SOURCE="ruantiblock"
-#         export BLLIST_MODE="fqdn"
-#     ;;
     *)
         export BLLIST_SOURCE=""
         export BLLIST_MODE=""
@@ -170,13 +168,13 @@ case "$BLLIST_PRESET" in
 esac
 
 AWK_CMD="awk"
-LOGGER_CMD=`which logger`
+LOGGER_CMD="$(which logger)"
 if [ $ENABLE_LOGGING = "1" -a $? -ne 0 ]; then
     echo " Logger doesn't exists" >&2
     ENABLE_LOGGING=0
 fi
 LOGGER_PARAMS="-t ${SCRIPT_NAME}"
-WGET_CMD=`which wget`
+WGET_CMD="$(which wget)"
 if [ $? -ne 0 ]; then
     echo " Error! Wget doesn't exists" >&2
     exit 1
@@ -192,17 +190,16 @@ export IP_DATA_FILE="${DATA_DIR}/${NAME}.ip"
 export DNSMASQ_DATA_FILE="${DATA_DIR}/${NAME}.dnsmasq"
 export NFT_TABLE="ip r"
 export NFT_TABLE_DNSMASQ="4#ip#r"
-export NFTSET_ALLOWED_HOSTS="allowed_ip"
-export NFTSET_ONION="onion"
 export NFTSET_CIDR="c"
 export NFTSET_IP="i"
 export NFTSET_DNSMASQ="d"
-export NFTSET_ALLOWED_HOSTS_TYPE="ipv4_addr"
 export NFTSET_CIDR_TYPE="ipv4_addr"
 export NFTSET_IP_TYPE="ipv4_addr"
 export NFTSET_DNSMASQ_TYPE="ipv4_addr"
-export NFTSET_CIDR_CFG="set ${NFTSET_CIDR} {type ${NFTSET_CIDR_TYPE};size ${NFTSET_MAXELEM_CIDR};policy ${NFTSET_POLICY_CIDR};flags interval;auto-merge;"
-export NFTSET_IP_CFG="set ${NFTSET_IP} {type ${NFTSET_IP_TYPE};size ${NFTSET_MAXELEM_IP};policy ${NFTSET_POLICY_IP};flags dynamic;"
+export NFTSET_CIDR_PATTERN="set %s {type ${NFTSET_CIDR_TYPE};size ${NFTSET_MAXELEM_CIDR};policy ${NFTSET_POLICY_CIDR};flags interval;auto-merge;"
+export NFTSET_IP_PATTERN="set %s {type ${NFTSET_IP_TYPE};size ${NFTSET_MAXELEM_IP};policy ${NFTSET_POLICY_IP};flags dynamic;"
+export NFTSET_CIDR_STRING_MAIN=$(printf "$NFTSET_CIDR_PATTERN" "${NFTSET_CIDR}")
+export NFTSET_IP_STRING_MAIN=$(printf "$NFTSET_IP_PATTERN" "${NFTSET_IP}")
 export UPDATE_STATUS_FILE="${DATA_DIR}/update_status"
 export USER_ENTRIES_STATUS_FILE="${DATA_DIR}/user_entries_status"
 export IP_DATA_FILE_TMP="${IP_DATA_FILE}.tmp"
@@ -237,7 +234,11 @@ ClearDataFiles() {
 }
 
 ParseUserEntries() {
-    $AWK_CMD -v IP_DATA_FILE="$1" -v DNSMASQ_DATA_FILE="$2" -v USER_ENTRIES_STATUS_FILE="$3" -v ID="$4" 'BEGIN {
+    $AWK_CMD -v NFTSET_IP_STRING="$NFTSET_IP_STRING_MAIN" -v NFTSET_CIDR_STRING="$NFTSET_CIDR_STRING_MAIN" \
+        -v NFTSET_DNSMASQ="$NFTSET_DNSMASQ" -v IP_DATA_FILE="$1" \
+        -v DNSMASQ_DATA_FILE="$2" -v USER_ENTRIES_STATUS_FILE="$3" \
+        -v ID="$4" -v USER_ENTRIES_DNS="$USER_ENTRIES_DNS" '
+        BEGIN {
             null = "";
             ip_array[0] = null;
             cidr_array[0] = null;
@@ -251,13 +252,13 @@ ParseUserEntries() {
             return _str;
         };
         function writeDNSData(val, dns) {
-            if(length(dns) == 0 && length(ENVIRON["USER_ENTRIES_DNS"]) > 0) {
-                dns = ENVIRON["USER_ENTRIES_DNS"];
+            if(length(dns) == 0 && length(USER_ENTRIES_DNS) > 0) {
+                dns = USER_ENTRIES_DNS;
             };
             if(length(dns) > 0) {
                 printf "server=/%s/%s\n", val, dns >> DNSMASQ_DATA_FILE;
             };
-            printf "nftset=/%s/%s#%s\n", val, ENVIRON["NFT_TABLE_DNSMASQ"], ENVIRON["NFTSET_DNSMASQ"] >> DNSMASQ_DATA_FILE;
+            printf "nftset=/%s/%s#%s\n", val, ENVIRON["NFT_TABLE_DNSMASQ"], NFTSET_DNSMASQ >> DNSMASQ_DATA_FILE;
         };
         function writeFqdnEntries() {
             delete fqdn_array[0];
@@ -267,13 +268,14 @@ ParseUserEntries() {
             };
         };
         ($0 !~ /^([\040\011]*$|#)/) {
+            sub("\015", "", $0);
             if($0 ~ /^[0-9]{1,3}([.][0-9]{1,3}){3}$/) {
                 ip_array[$0] = null;
             }
             else if($0 ~ /^[0-9]{1,3}([.][0-9]{1,3}){3}[\057][0-9]{1,2}$/) {
                 cidr_array[$0] = null;
             }
-            else if($0 ~ /^[a-z0-9.\052-]+[.]([a-z]{2,}|xn--[a-z0-9]+)([ ][0-9]{1,3}([.][0-9]{1,3}){3}([#][0-9]{2,5})?)?$/) {
+            else if($0 ~ /^([a-z0-9._-]+[.])*([a-z]{2,}|xn--[a-z0-9]+)([ ][0-9]{1,3}([.][0-9]{1,3}){3}([#][0-9]{2,5})?)?$/) {
                 fqdn_array[length(fqdn_array)] = $1 " " $2;
             };
         }
@@ -285,11 +287,11 @@ ParseUserEntries() {
             delete cidr_array[0];
             delete ip_array[0];
             if(ret_code == 0 && (length(cidr_array) > 0 || length(ip_array) > 0)) {
-                printf "table %s {\n%s", ENVIRON["NFT_TABLE"], ENVIRON["NFTSET_CIDR_CFG"] >> IP_DATA_FILE;
+                printf "table %s {\n%s", ENVIRON["NFT_TABLE"], NFTSET_CIDR_STRING >> IP_DATA_FILE;
                 if(length(cidr_array) > 0) {
                     printf "elements={%s};", writeIpList(cidr_array) >> IP_DATA_FILE;
                 };
-                printf "}\n%s", ENVIRON["NFTSET_IP_CFG"] >> IP_DATA_FILE;
+                printf "}\n%s", NFTSET_IP_STRING >> IP_DATA_FILE;
 
                 if(length(ip_array) > 0) {
                     printf "elements={%s};", writeIpList(ip_array) >> IP_DATA_FILE;
@@ -362,11 +364,11 @@ AddUserEntries() {
         fi
         while read _str
         do
-            _update_string=`printf "$_str" | $AWK_CMD '{
+            _update_string="$(printf "$_str" | $AWK_CMD '{
                 if(NF == 4) {
                     printf "User entries (%s): CIDR: %s, IP: %s, FQDN: %s", $4, $1, $2, $3;
                 };
-            }'`
+            }')"
             if [ -n "$_update_string" ]; then
                 ### STDOUT
                 echo " ${_update_string}"
@@ -389,15 +391,15 @@ GetDataFiles() {
             ### STDOUT
             echo " Module run attempt ${_attempt}: failed [${BLLIST_MODULE}]"
             MakeLogRecord "err" "Module run attempt ${_attempt}: failed [${BLLIST_MODULE}]"
-            _attempt=`expr $_attempt + 1`
+            _attempt=$(($_attempt + 1))
             [ $_attempt -gt $MODULE_RUN_ATTEMPTS ] && break
             sleep $MODULE_RUN_TIMEOUT
         done
         if [ $_return_code -eq 0 ]; then
-            _update_string=`$AWK_CMD '{
+            _update_string="$($AWK_CMD '{
                 printf "Received entries: %s\n", (NF < 3) ? "No data" : "CIDR: "$1", IP: "$2", FQDN: "$3;
                 exit;
-            }' "$UPDATE_STATUS_FILE"`
+            }' "$UPDATE_STATUS_FILE")"
             ### STDOUT
             echo " ${_update_string}"
             MakeLogRecord "notice" "${_update_string}"
