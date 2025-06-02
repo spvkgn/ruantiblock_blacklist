@@ -18,8 +18,10 @@ export MODULES_DIR="."
 
 ########################## Default Settings ############################
 
+### Запись событий в syslog (0 - off, 1 - on)
+export ENABLE_LOGGING=1
 ### Добавление в список блокировок пользовательских записей из файла $USER_ENTRIES_FILE (0 - off, 1 - on)
-###  В $DATA_DIR можно создать текстовый файл user_entries с записями IP, CIDR или FQDN (одна на строку). Эти записи будут добавлены в список блокировок
+###  В $CONFIG_DIR можно создать текстовый файл user_entries с записями IP, CIDR или FQDN (одна на строку). Эти записи будут добавлены в список блокировок
 ###  В записях FQDN можно задать DNS-сервер для разрешения данного домена, через пробел (прим.: domain.com 8.8.8.8)
 ###  Можно комментировать строки (#)
 export ADD_USER_ENTRIES=0
@@ -27,8 +29,14 @@ export ADD_USER_ENTRIES=0
 export USER_ENTRIES_DNS=""
 ### Файл пользовательских записей
 export USER_ENTRIES_FILE="${CONFIG_DIR}/user_entries"
-### Запись событий в syslog (0 - off, 1 - on)
-export ENABLE_LOGGING=1
+### URL удаленных файлов записей пользователя, через пробел (прим.: http://server.lan/files/user_entries_1 http://server.lan/files/user_entries_2)
+export USER_ENTRIES_REMOTE=""
+### Кол-во попыток скачивания удаленного файла записей пользователя (в случае неудачи)
+export USER_ENTRIES_REMOTE_DOWNLOAD_ATTEMPTS=3
+### Таймаут между попытками скачивания
+export USER_ENTRIES_REMOTE_DOWNLOAD_TIMEOUT=60
+### Режим безопасного обновления блэклиста. Скачивание во временный файл и затем замена на основной. Увеличивает потребление памяти (0 - выкл, 1 - вкл)
+export ENABLE_TMP_DOWNLOADS=0
 ### Кол-во попыток обновления блэклиста (в случае неудачи)
 export MODULE_RUN_ATTEMPTS=3
 ### Таймаут между попытками обновления
@@ -39,36 +47,44 @@ BLLIST_MODULE="${MODULES_DIR}/ruab_parser.py"
 
 ############################## Parsers #################################
 
-### Режим обхода блокировок: zapret-info-fqdn, zapret-info-ip, rublacklist-fqdn, rublacklist-ip, antifilter-ip, ruantiblock-fqdn, ruantiblock-ip
-export BLLIST_PRESET="zapret-info-fqdn"
+### Режим обхода блокировок: zapret-info-fqdn, zapret-info-ip, rublacklist-fqdn, rublacklist-ip, antifilter-ip, fz-fqdn, fz-ip
+export BLLIST_PRESET=""
 ### В случае если из источника получено менее указанного кол-ва записей, то обновления списков не происходит
-export BLLIST_MIN_ENTRIES=3000
+export BLLIST_MIN_ENTRIES=30000
 ### Лимит IP адресов. При достижении, в конфиг ipset будет добавлена вся подсеть /24 вместо множества IP адресов пренадлежащих этой сети (0 - off)
 export BLLIST_IP_LIMIT=0
-### Подсети класса C (/24). IP адреса из этих подсетей не группируются при оптимизации (записи д.б. в виде: 68.183.221. 149.154.162. и пр.). Прим.: "68.183.221. 149.154.162."
-export BLLIST_GR_EXCLUDED_NETS=""
+### Файл с подсетями класса C (/24). IP адреса из этих подсетей не группируются при оптимизации (записи д.б. в виде: 68.183.221. 149.154.162. и пр. Одна запись на строку)
+export BLLIST_GR_EXCLUDED_NETS_FILE="${CONFIG_DIR}/gr_excluded_nets"
 ### Группировать идущие подряд IP адреса в подсетях /24 в диапазоны CIDR
 export BLLIST_SUMMARIZE_IP=0
 ### Группировать идущие подряд подсети /24 в диапазоны CIDR
 export BLLIST_SUMMARIZE_CIDR=0
 ### Фильтрация записей блэклиста по шаблонам из файла BLLIST_IP_FILTER_FILE. Записи (IP, CIDR) попадающие под шаблоны исключаются из кофига ipset (0 - off, 1 - on)
 export BLLIST_IP_FILTER=0
-### Тип фильтра IP (0 - все записи, кроме совпадающих с выражениями; 1 - только записи, совпадающие с выражениями)
+### Тип фильтра IP (0 - все записи, кроме совпадающих с шаблонами; 1 - только записи, совпадающие с шаблонами)
 export BLLIST_IP_FILTER_TYPE=0
 ### Файл с шаблонами IP для опции BLLIST_IP_FILTER (каждый шаблон в отдельной строке. # в первом символе строки - комментирует строку)
 export BLLIST_IP_FILTER_FILE="${CONFIG_DIR}/ip_filter"
+### Включение опции исключения IP/CIDR из блэклиста
+export BLLIST_IP_EXCLUDED_ENABLE=0
+### Файл с записями IP/CIDR для опции BLLIST_IP_EXCLUDED_ENABLE
+export BLLIST_IP_EXCLUDED_FILE="${CONFIG_DIR}/ip_excluded"
 ### Лимит субдоменов для группировки. При достижении, в конфиг dnsmasq будет добавлен весь домен 2-го ур-ня вместо множества субдоменов (0 - off)
-export BLLIST_SD_LIMIT=16
-### SLD не подлежащие группировке при оптимизации (через пробел)
-export BLLIST_GR_EXCLUDED_SLD="livejournal.com facebook.com vk.com blog.jp msk.ru net.ru org.ru net.ua com.ua org.ua co.uk amazonaws.com spb.ru"
-### Не группировать SLD попадающие под выражения (через пробел) ("[.][a-z]{2,3}[.][a-z]{2}$")
-export BLLIST_GR_EXCLUDED_MASKS=""
+export BLLIST_SD_LIMIT=0
+### Файл с SLD не подлежащими группировке при оптимизации (одна запись на строку)
+export BLLIST_GR_EXCLUDED_SLD_FILE="${CONFIG_DIR}/gr_excluded_sld"
+### Файл с масками SLD не подлежащими группировке при оптимизации (одна запись на строку)
+export BLLIST_GR_EXCLUDED_SLD_MASKS_FILE="${CONFIG_DIR}/gr_excluded_sld_mask"
 ### Фильтрация записей блэклиста по шаблонам из файла ENTRIES_FILTER_FILE. Записи (FQDN) попадающие под шаблоны исключаются из кофига dnsmasq (0 - off, 1 - on)
 export BLLIST_FQDN_FILTER=0
-### Тип фильтра FQDN (0 - все записи, кроме совпадающих с выражениями; 1 - только записи, совпадающие с выражениями)
+### Тип фильтра FQDN (0 - все записи, кроме совпадающих с шаблонами; 1 - только записи, совпадающие с шаблонами)
 export BLLIST_FQDN_FILTER_TYPE=0
 ### Файл с шаблонами FQDN для опции BLLIST_FQDN_FILTER (каждый шаблон в отдельной строке. # в первом символе строки - комментирует строку)
 export BLLIST_FQDN_FILTER_FILE="${CONFIG_DIR}/fqdn_filter"
+### Включение опции исключения FQDN из блэклиста
+export BLLIST_FQDN_EXCLUDED_ENABLE=0
+### Файл с записями FQDN для опции BLLIST_FQDN_EXCLUDED_ENABLE
+export BLLIST_FQDN_EXCLUDED_FILE="${CONFIG_DIR}/fqdn_excluded"
 ### Обрезка www[0-9]. в FQDN (0 - off, 1 - on)
 export BLLIST_STRIP_WWW=1
 ### Преобразование кириллических доменов в punycode (0 - off, 1 - on)
@@ -78,23 +94,6 @@ export BLLIST_ALT_NSLOOKUP=0
 ### Альтернативный DNS-сервер
 export BLLIST_ALT_DNS_ADDR="8.8.8.8"
 
-### Источники блэклиста
-export RBL_ALL_URL="https://reestr.rublacklist.net/api/v3/snapshot/"
-export RBL_IP_URL="https://reestr.rublacklist.net/api/v3/ips/"
-export ZI_ALL_URL="https://raw.githubusercontent.com/zapret-info/z-i/master/dump.csv.gz"
-export AF_IP_URL="https://antifilter.download/list/allyouneed.lst"
-export AF_FQDN_URL="https://antifilter.download/list/domains.lst"
-# export RA_IP_IPSET_URL="https://raw.githubusercontent.com/gSpotx2f/ruantiblock_blacklist/master/blacklist/ip/ruantiblock.ip"
-# export RA_IP_DMASK_URL="https://raw.githubusercontent.com/gSpotx2f/ruantiblock_blacklist/master/blacklist/ip/ruantiblock.dnsmasq"
-# export RA_IP_STAT_URL="https://raw.githubusercontent.com/gSpotx2f/ruantiblock_blacklist/master/blacklist/ip/update_status"
-# export RA_FQDN_IPSET_URL="https://raw.githubusercontent.com/gSpotx2f/ruantiblock_blacklist/master/blacklist/fqdn/ruantiblock.ip"
-# export RA_FQDN_DMASK_URL="https://raw.githubusercontent.com/gSpotx2f/ruantiblock_blacklist/master/blacklist/fqdn/ruantiblock.dnsmasq"
-# export RA_FQDN_STAT_URL="https://raw.githubusercontent.com/gSpotx2f/ruantiblock_blacklist/master/blacklist/fqdn/update_status"
-export RBL_ENCODING=""
-export ZI_ENCODING="CP1251"
-export AF_ENCODING=""
-# export RA_ENCODING=""
-
 ############################ Configuration #############################
 
 ### External config
@@ -103,13 +102,35 @@ if [ -n "$1" ]; then
 fi
 [ -f "$CONFIG_FILE" ] && . "$CONFIG_FILE"
 
-### Blacklist source and mode
+### Blacklist sources
+## rublacklist
+export RBL_ALL_URL="https://reestr.rublacklist.net/api/v3/snapshot/"
+export RBL_IP_URL="https://reestr.rublacklist.net/api/v3/ips/"
+export RBL_DPI_URL="https://reestr.rublacklist.net/api/v3/dpi/"
+export RBL_ENCODING=""
+## zapret-info
+export ZI_ALL_URL="https://raw.githubusercontent.com/zapret-info/z-i/master/dump.csv.gz"
+#export ZI_ALL_URL="https://app.assembla.com/spaces/z-i/git/source/master/dump.csv?_format=raw"
+export ZI_ENCODING="CP1251"
+## antifilter
+export AF_IP_URL="https://antifilter.download/list/allyouneed.lst"
+export AF_FQDN_URL="https://antifilter.download/list/domains.lst"
+export AF_ENCODING=""
+## fz
+export FZ_URL="https://raw.githubusercontent.com/fz139/vigruzki/main/dump.xml.00 https://raw.githubusercontent.com/fz139/vigruzki/main/dump.xml.01 https://raw.githubusercontent.com/fz139/vigruzki/main/dump.xml.02"
+export FZ_ENCODING="CP1251"
+
+### Blacklist presets
 case "$BLLIST_PRESET" in
     zapret-info-ip)
-        ### Источник для обновления списка блокировок (zapret-info, rublacklist, antifilter, ruantiblock)
+        ### Источник для обновления списка блокировок (zapret-info, rublacklist, antifilter, fz, ruantiblock)
         export BLLIST_SOURCE="zapret-info"
         ### Режим обхода блокировок: ip, fqdn
         export BLLIST_MODE="ip"
+    ;;
+    zapret-info-fqdn)
+        export BLLIST_SOURCE="zapret-info"
+        export BLLIST_MODE="fqdn"
     ;;
     rublacklist-ip)
         export BLLIST_SOURCE="rublacklist"
@@ -123,35 +144,41 @@ case "$BLLIST_PRESET" in
         export BLLIST_SOURCE="antifilter"
         export BLLIST_MODE="ip"
     ;;
-#     ruantiblock-ip)
-#         export BLLIST_SOURCE="ruantiblock"
-#         export BLLIST_MODE="ip"
-#     ;;
-#     ruantiblock-fqdn)
-#         export BLLIST_SOURCE="ruantiblock"
-#         export BLLIST_MODE="fqdn"
-#     ;;
-    *)
-        export BLLIST_SOURCE="zapret-info"
+    fz-ip)
+        export BLLIST_SOURCE="fz"
+        export BLLIST_MODE="ip"
+    ;;
+    fz-fqdn)
+        export BLLIST_SOURCE="fz"
         export BLLIST_MODE="fqdn"
+    ;;
+    *)
+        export BLLIST_SOURCE=""
+        export BLLIST_MODE=""
     ;;
 esac
 
 AWK_CMD="awk"
-LOGGER_CMD=`which logger`
+LOGGER_CMD="$(which logger)"
 if [ $ENABLE_LOGGING = "1" -a $? -ne 0 ]; then
     echo " Logger doesn't exists" >&2
     ENABLE_LOGGING=0
 fi
 LOGGER_PARAMS="-t ${SCRIPT_NAME}"
+WGET_CMD="$(which wget)"
+if [ $? -ne 0 ]; then
+    echo " Error! Wget doesn't exists" >&2
+    exit 1
+fi
+WGET_PARAMS="--no-check-certificate -q -O"
 
 ### Output directory
 if [ -n "$2" ]; then
     export DATA_DIR="$2"
 fi
 
-export DNSMASQ_DATA_FILE="${DATA_DIR}/${NAME}.dnsmasq"
 export IP_DATA_FILE="${DATA_DIR}/${NAME}.ip"
+export DNSMASQ_DATA_FILE="${DATA_DIR}/${NAME}.dnsmasq"
 export IPSET_ONION="r_onion"
 export IPSET_CIDR="rc"
 export IPSET_CIDR_TMP="${IPSET_CIDR}t"
@@ -159,6 +186,11 @@ export IPSET_IP="ri"
 export IPSET_IP_TMP="${IPSET_IP}t"
 export IPSET_DNSMASQ="rd"
 export UPDATE_STATUS_FILE="${DATA_DIR}/update_status"
+export USER_ENTRIES_STATUS_FILE="${DATA_DIR}/user_entries_status"
+export IP_DATA_FILE_TMP="${IP_DATA_FILE}.tmp"
+export DNSMASQ_DATA_FILE_TMP="${DNSMASQ_DATA_FILE}.tmp"
+export UPDATE_STATUS_FILE_TMP="${UPDATE_STATUS_FILE}.tmp"
+export USER_ENTRIES_STATUS_FILE_TMP="${USER_ENTRIES_STATUS_FILE}.tmp"
 
 [ -d "$DATA_DIR" ] || mkdir -p "$DATA_DIR"
 
@@ -168,47 +200,168 @@ MakeLogRecord() {
     fi
 }
 
+Download() {
+    $WGET_CMD $WGET_PARAMS "$1" "$2"
+    if [ $? -ne 0 ]; then
+        echo " Downloading failed! Connection error (${2})" >&2
+        MakeLogRecord "err" "Downloading failed! Connection error (${2})"
+        return 1
+    fi
+}
+
+ClearDataFiles() {
+    if [ -d "$DATA_DIR" ]; then
+        printf "" > "$DNSMASQ_DATA_FILE"
+        printf "" > "$IP_DATA_FILE"
+        printf "0 0 0" > "$UPDATE_STATUS_FILE"
+        printf "" > "$USER_ENTRIES_STATUS_FILE"
+    fi
+}
+
+ParseUserEntries() {
+    $AWK_CMD -v IP_DATA_FILE="$1" -v DNSMASQ_DATA_FILE="$2" -v USER_ENTRIES_STATUS_FILE="$3" -v ID="$4" '
+    BEGIN {
+        null = "";
+        ip_array[0] = null;
+        cidr_array[0] = null;
+        fqdn_array[0] = null;
+    }
+    function writeIpList(ip_list,    i, first, last, count, output) {
+        output = "";
+        for (i in ip_list) {
+            if (output != "") output = output ",";
+            output = output ip_list[i];
+        }
+        return output;
+    }
+    function writeDNSData(val, dns) {
+        if(length(dns) == 0 && length(ENVIRON["USER_ENTRIES_DNS"]) > 0) {
+            dns = ENVIRON["USER_ENTRIES_DNS"];
+        };
+        if(length(dns) > 0) {
+            printf "server=/%s/%s\n", val, dns >> DNSMASQ_DATA_FILE;
+        };
+        printf "ipset=/%s/%s\n", val, ENVIRON["IPSET_DNSMASQ"] >> DNSMASQ_DATA_FILE;
+    };
+    function writeFqdnEntries() {
+        delete fqdn_array[0];
+        for(i in fqdn_array) {
+            split(fqdn_array[i], a, " ");
+            writeDNSData(a[1], a[2]);
+        };
+    };
+    ($0 !~ /^([\040\011]*$|#)/) {
+        if($0 ~ /^[0-9]{1,3}([.][0-9]{1,3}){3}$/) {
+            ip_array[$0] = null;
+        }
+        else if($0 ~ /^[0-9]{1,3}([.][0-9]{1,3}){3}[\057][0-9]{1,2}$/) {
+            cidr_array[$0] = null;
+        }
+        else if($0 ~ /^[a-z0-9.\052-]+[.]([a-z]{2,}|xn--[a-z0-9]+)([ ][0-9]{1,3}([.][0-9]{1,3}){3}([#][0-9]{2,5})?)?$/) {
+            fqdn_array[length(fqdn_array)] = $1 " " $2;
+        };
+    }
+    END {
+        ret_code = 0;
+        if($0 ~ /[0-9]+/) {
+            ret_code = $0;
+        };
+        delete cidr_array[0];
+        delete ip_array[0];
+        if(ret_code == 0 && (length(cidr_array) > 0 || length(ip_array) > 0)) {
+            if(length(cidr_array) > 0) {
+                printf "add %s %s\n", ENVIRON["IPSET_CIDR_TMP"], writeIpList(cidr_array) >> IP_DATA_FILE;
+            };
+
+            if(length(ip_array) > 0) {
+                printf "add %s %s\n", ENVIRON["IPSET_IP_TMP"], writeIpList(ip_array) >> IP_DATA_FILE;
+            };
+        };
+        writeFqdnEntries();
+        if(ret_code == 0) {
+            printf "%s %s %s %s\n", length(cidr_array), length(ip_array), length(fqdn_array), ID >> USER_ENTRIES_STATUS_FILE;
+        };
+        exit ret_code;
+    }' -
+}
+
 AddUserEntries() {
+    local _url _return_code=0 _attempt=1 _ip_data_file _dnsmasq_data_file _user_entries_status_file _str _update_string
     if [ "$ADD_USER_ENTRIES" = "1" ]; then
-        if [ -f "$USER_ENTRIES_FILE" -a -s "$USER_ENTRIES_FILE" ]; then
-            $AWK_CMD 'BEGIN {
-                        null="";
-                        while((getline ip_string <ENVIRON["IP_DATA_FILE"]) > 0) {
-                            split(ip_string, ip_string_arr, " ");
-                            ip_data_array[ip_string_arr[3]]=null;
-                        };
-                        close(ENVIRON["IP_DATA_FILE"]);
-                        while((getline fqdn_string <ENVIRON["DNSMASQ_DATA_FILE"]) > 0) {
-                            split(fqdn_string, fqdn_string_arr, "/");
-                            fqdn_data_array[fqdn_string_arr[2]]=null;
-                        };
-                        close(ENVIRON["DNSMASQ_DATA_FILE"]);
-                    }
-                    function writeIpsetEntries(val, set) {
-                        printf "add %s %s\n", set, val >> ENVIRON["IP_DATA_FILE"];
-                    };
-                    function writeDNSData(val, dns) {
-                        if(length(dns) == 0 && length(ENVIRON["USER_ENTRIES_DNS"]) > 0)
-                            dns = ENVIRON["USER_ENTRIES_DNS"];
-                        if(length(dns) > 0)
-                            printf "server=/%s/%s\n", val, dns >> ENVIRON["DNSMASQ_DATA_FILE"];
-                        printf "ipset=/%s/%s\n", val, ENVIRON["IPSET_DNSMASQ"] >> ENVIRON["DNSMASQ_DATA_FILE"];
-                    };
-                    ($0 !~ /^([\040\011]*$|#)/) {
-                        if($0 ~ /^[0-9]{1,3}([.][0-9]{1,3}){3}$/ && !($0 in ip_data_array))
-                            writeIpsetEntries($0, ENVIRON["IPSET_IP_TMP"]);
-                        else if($0 ~ /^[0-9]{1,3}([.][0-9]{1,3}){3}[\057][0-9]{1,2}$/ && !($0 in ip_data_array))
-                            writeIpsetEntries($0, ENVIRON["IPSET_CIDR_TMP"]);
-                        else if($0 ~ /^[a-z0-9.\052-]+[.]([a-z]{2,}|xn--[a-z0-9]+)([ ][0-9]{1,3}([.][0-9]{1,3}){3}([#][0-9]{2,5})?)?$/ && !($1 in fqdn_data_array))
-                            writeDNSData($1, $2);
-                    }' "$USER_ENTRIES_FILE"
+        if [ "$ENABLE_TMP_DOWNLOADS" = "1" ]; then
+            _ip_data_file="$IP_DATA_FILE_TMP"
+            _dnsmasq_data_file="$DNSMASQ_DATA_FILE_TMP"
+            _user_entries_status_file="$USER_ENTRIES_STATUS_FILE_TMP"
+            rm -f "$_ip_data_file" "$_dnsmasq_data_file" "$_user_entries_status_file"
+        else
+            _ip_data_file="$IP_DATA_FILE"
+            _dnsmasq_data_file="$DNSMASQ_DATA_FILE"
+            _user_entries_status_file="$USER_ENTRIES_STATUS_FILE"
         fi
+        if [ "$1" = "flush" ]; then
+            if [ "$ENABLE_TMP_DOWNLOADS" != "1" ]; then
+                ClearDataFiles
+            fi
+            printf "flush set %s %s\nflush set %s %s\n" "$NFT_TABLE" "$IPSET_CIDR" "$NFT_TABLE" "$IPSET_IP" >> "$_ip_data_file"
+        else
+            printf "" > "$USER_ENTRIES_STATUS_FILE"
+        fi
+        if [ -f "$USER_ENTRIES_FILE" ]; then
+            { cat "$USER_ENTRIES_FILE"; echo 0; } | ParseUserEntries "$_ip_data_file" "$_dnsmasq_data_file" "$_user_entries_status_file" "local"
+        fi
+        if [ -n "$USER_ENTRIES_REMOTE" ]; then
+            for _url in $USER_ENTRIES_REMOTE
+            do
+                _attempt=1
+                while :
+                do
+                    { Download - "$_url"; echo $?; } | ParseUserEntries "$_ip_data_file" "$_dnsmasq_data_file" "$_user_entries_status_file" "$_url"
+                    if [ $? -eq 0 ]; then
+                        break
+                    else
+                        _return_code=1
+                        ### STDOUT
+                        echo " User entries download attempt ${_attempt}: failed [${_url}]" >&2
+                        MakeLogRecord "err" "User entries download attempt ${_attempt}: failed [${_url}]"
+                        _attempt=$(($_attempt + 1))
+                        [ $_attempt -gt $USER_ENTRIES_REMOTE_DOWNLOAD_ATTEMPTS ] && break
+                        sleep $USER_ENTRIES_REMOTE_DOWNLOAD_TIMEOUT
+                    fi
+                done
+            done
+        fi
+        if [ "$ENABLE_TMP_DOWNLOADS" = "1" ]; then
+            if [ $_return_code -eq 0 ]; then
+                if [ "$1" = "flush" ]; then
+                    ClearDataFiles
+                fi
+                cat "$_ip_data_file" >> "$IP_DATA_FILE"
+                cat "$_dnsmasq_data_file" >> "$DNSMASQ_DATA_FILE"
+                mv -f "$_user_entries_status_file" "$USER_ENTRIES_STATUS_FILE"
+            fi
+            rm -f "$_ip_data_file" "$_dnsmasq_data_file"  "$_user_entries_status_file"
+        fi
+        while read _str
+        do
+            _update_string="$(printf "$_str" | $AWK_CMD '{
+                if(NF == 4) {
+                    printf "User entries (%s): CIDR: %s, IP: %s, FQDN: %s", $4, $1, $2, $3;
+                };
+            }')"
+            if [ -n "$_update_string" ]; then
+                ### STDOUT
+                echo " ${_update_string}"
+                MakeLogRecord "notice" "${_update_string}"
+            fi
+        done < "$USER_ENTRIES_STATUS_FILE"
+    else
+        printf "" > "$USER_ENTRIES_STATUS_FILE"
     fi
 }
 
 GetDataFiles() {
     local _return_code=1 _attempt=1 _update_string
-    if [ -n "$BLLIST_MODULE" ]; then
+    if [ -n "$BLLIST_PRESET" -a -n "$BLLIST_MODULE" ]; then
         while :
         do
             nice -n 19 $BLLIST_MODULE
@@ -217,24 +370,30 @@ GetDataFiles() {
             ### STDOUT
             echo " Module run attempt ${_attempt}: failed [${BLLIST_MODULE}]"
             MakeLogRecord "err" "Module run attempt ${_attempt}: failed [${BLLIST_MODULE}]"
-            _attempt=`expr $_attempt + 1`
+            _attempt=$(($_attempt + 1))
             [ $_attempt -gt $MODULE_RUN_ATTEMPTS ] && break
             sleep $MODULE_RUN_TIMEOUT
         done
         if [ $_return_code -eq 0 ]; then
-            AddUserEntries
-            _update_string=`$AWK_CMD '{
+            _update_string="$($AWK_CMD '{
                 printf "Received entries: %s\n", (NF < 3) ? "No data" : "CIDR: "$1", IP: "$2", FQDN: "$3;
                 exit;
-            }' "$UPDATE_STATUS_FILE"`
+            }' "$UPDATE_STATUS_FILE")"
             ### STDOUT
             echo " ${_update_string}"
             MakeLogRecord "notice" "${_update_string}"
+            AddUserEntries
         fi
-    else
-        AddUserEntries
+
+    elif [ -z "$BLLIST_PRESET" -a -z "$BLLIST_MODULE" ]; then
+        ADD_USER_ENTRIES=1
+        AddUserEntries flush
         _return_code=0
+    else
+        _return_code=2
+        return $_return_code
     fi
+
     return $_return_code
 }
 
