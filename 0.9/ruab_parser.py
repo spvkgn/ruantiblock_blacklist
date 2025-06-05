@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-(с) 2024 gSpot (https://github.com/gSpotx2f/ruantiblock_openwrt)
+(с) 2025 gSpot (https://github.com/gSpotx2f/ruantiblock_openwrt)
 
  Python >= 3.6
 """
@@ -42,8 +42,6 @@ class Config:
         "IPSET_DNSMASQ",
         "IPSET_CIDR",
         "IPSET_IP",
-        "IPSET_CIDR_CFG",
-        "IPSET_IP_CFG",
         "DNSMASQ_DATA_FILE",
         "IP_DATA_FILE",
         "UPDATE_STATUS_FILE",
@@ -303,8 +301,12 @@ class BlackListParser(Config):
                             break
                         yield chunk
 
-    def _align_chunk(self, url):
+    def prepare_data(self, url):
         for chunk in self._download_data(url):
+            yield chunk
+
+    def _align_chunk(self, url):
+        for chunk in self.prepare_data(url):
             if chunk is None:
                 yield self.rest
                 continue
@@ -347,8 +349,8 @@ class BlackListParser(Config):
             ):
                 self.ip_dict[value] = subnet
                 self.ip_subnet_dict[subnet] = (self.ip_subnet_dict.get(subnet) or 0) + 1
-        elif self.cidr_pattern.fullmatch(value) and value not in self.cidr_set:
-                self.cidr_set.add(value)
+        elif self.cidr_pattern.fullmatch(value):
+            self.cidr_set.add(value)
 
     def _convert_to_punycode(self, string):
         if self.cyr_pattern.search(string):
@@ -455,7 +457,7 @@ class Summarize:
                 hosts = 1
             end = ip_obj
         else:
-            if hosts > 1 and hosts >= HOSTS_LIMIT:
+            if hosts > 1 and hosts >= cls.HOSTS_LIMIT:
                 if raw_list:
                     remove_items(start, end)
                 yield start, end
@@ -528,6 +530,18 @@ class OptimizeConfig(Config):
         self.ip_count = 0
         self.output_fqdn_count = 0
 
+    def _remove_subdomains(self):
+        tld_dict = {}
+        for fqdn, sld in self.fqdn_dict.items():
+            tld_dict.setdefault(sld, [])
+            tld_dict[sld].append(fqdn)
+        for v in tld_dict.values():
+            for i in v:
+                if i in self.fqdn_dict:
+                    for j in v:
+                        if (j != i) and j.endswith("." + i):
+                            self.fqdn_dict.pop(j, None)
+
     def _optimize_fqdn_dict(self):
         optimized_set = set()
         for fqdn, sld in self.fqdn_dict.items():
@@ -576,6 +590,7 @@ class OptimizeConfig(Config):
             self.ip_subnet_dict.update(i.ip_subnet_dict)
             self.fqdn_dict.update(i.fqdn_dict)
             self.sld_dict.update(i.sld_dict)
+        self._remove_subdomains()
         self._optimize_fqdn_dict()
         self._optimize_ip_dict()
         self._group_ip_ranges()
@@ -606,7 +621,8 @@ class WriteConfigFiles(Config):
 
     def write_update_status_file(self, ip_count, cidr_count, fqdn_count):
         with open(self.UPDATE_STATUS_FILE, "wt") as file_handler:
-            file_handler.write(f"{cidr_count} {ip_count} {fqdn_count}")
+            file_handler.write(
+                f"{cidr_count} {ip_count} {fqdn_count}")
 
 
 class RblFQDN(BlackListParser):
@@ -700,7 +716,6 @@ class ZiIp(ZiFQDN):
                 entry_list = entry.split(self.fields_separator)
                 for i in entry_list[0].split(self.ips_separator):
                     self.ip_value_processing(i)
-
 
 class AfFQDN(BlackListParser):
     def __init__(self, *args, **kwargs):

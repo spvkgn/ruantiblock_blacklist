@@ -25,7 +25,6 @@ jobs:
         run: bash dl_expired_domains.sh fqdn_excluded
 
       - name: Create blacklist
-        shell: bash
         env:
           VERSION: ${{ matrix.version }}
           TYPE: ${{ matrix.type }}
@@ -33,7 +32,7 @@ jobs:
           BL_DIR=blacklist-$VERSION/$TYPE
           mkdir -p $BL_DIR
           ( cd ./$VERSION ; ./run_parser.sh ./ruantiblock_$TYPE.conf ../$BL_DIR )
-          tar cvf ${BL_DIR//\//-}.tar --transform "s|^\./|$BL_DIR/|" -C ./$BL_DIR .
+          tar -C ./$BL_DIR -cf ${BL_DIR//\//-}.tar --transform "s|^\./|$BL_DIR/|" .
 
       - uses: actions/upload-artifact@v4
         with:
@@ -57,14 +56,10 @@ jobs:
           echo DATE=$(date --utc "+%Y-%m-%d %H:%M %Z") >> $GITHUB_ENV
 
       - name: Deploy to GH pages
-        uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           user_name: 'github-actions[bot]'
           user_email: 'github-actions[bot]@users.noreply.github.com'
           full_commit_message: "Updated: ${{ env.DATE }}"
           force_orphan: false
-
-      - name: Delete workflow runs
-        uses: Mattraks/delete-workflow-runs@v2
-        continue-on-error: true
