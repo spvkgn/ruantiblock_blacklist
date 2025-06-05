@@ -109,7 +109,11 @@ export RBL_IP_URL="https://reestr.rublacklist.net/api/v3/ips/"
 export RBL_DPI_URL="https://reestr.rublacklist.net/api/v3/dpi/"
 export RBL_ENCODING=""
 ## zapret-info
-export ZI_ALL_URL="https://raw.githubusercontent.com/zapret-info/z-i/master/dump.csv.gz"
+ZI_GH_URL="https://raw.githubusercontent.com/zapret-info/z-i/master"
+export ZI_ALL_URL="$ZI_GH_URL/dump.csv.gz"
+#export ZI_ALL_URL="$ZI_GH_URL/dump-00.csv $ZI_GH_URL/dump-01.csv $ZI_GH_URL/dump-02.csv $ZI_GH_URL/dump-03.csv $ZI_GH_URL/dump-04.csv $ZI_GH_URL/dump-05.csv $ZI_GH_URL/dump-06.csv $ZI_GH_URL/dump-07.csv $ZI_GH_URL/dump-08.csv $ZI_GH_URL/dump-09.csv $ZI_GH_URL/dump-10.csv $ZI_GH_URL/dump-11.csv $ZI_GH_URL/dump-12.csv $ZI_GH_URL/dump-13.csv $ZI_GH_URL/dump-14.csv $ZI_GH_URL/dump-15.csv $ZI_GH_URL/dump-16.csv $ZI_GH_URL/dump-17.csv $ZI_GH_URL/dump-18.csv $ZI_GH_URL/dump-19.csv"
+#ZI_SF_URL="https://sourceforge.net/p/zapret-info/code/HEAD/tree"
+#export ZI_ALL_URL="$ZI_SF_URL/dump-00.csv?format=raw $ZI_SF_URL/dump-01.csv?format=raw $ZI_SF_URL/dump-02.csv?format=raw $ZI_SF_URL/dump-03.csv?format=raw $ZI_SF_URL/dump-04.csv?format=raw $ZI_SF_URL/dump-05.csv?format=raw $ZI_SF_URL/dump-06.csv?format=raw $ZI_SF_URL/dump-07.csv?format=raw $ZI_SF_URL/dump-08.csv?format=raw $ZI_SF_URL/dump-09.csv?format=raw $ZI_SF_URL/dump-10.csv?format=raw $ZI_SF_URL/dump-11.csv?format=raw $ZI_SF_URL/dump-12.csv?format=raw $ZI_SF_URL/dump-13.csv?format=raw $ZI_SF_URL/dump-14.csv?format=raw $ZI_SF_URL/dump-15.csv?format=raw $ZI_SF_URL/dump-16.csv?format=raw $ZI_SF_URL/dump-17.csv?format=raw $ZI_SF_URL/dump-18.csv?format=raw $ZI_SF_URL/dump-19.csv?format=raw"
 #export ZI_ALL_URL="https://app.assembla.com/spaces/z-i/git/source/master/dump.csv?_format=raw"
 export ZI_ENCODING="CP1251"
 ## antifilter
