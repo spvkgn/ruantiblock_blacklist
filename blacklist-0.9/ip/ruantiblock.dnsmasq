@@ -24,6 +24,7 @@ ipset=/rezka.ag/rd
 ipset=/hdrezka.ag/rd
 ipset=/hdrezka.in/rd
 ipset=/musicbrainz.org/rd
+ipset=/metabrainz.org/rd
 ipset=/vpngate.net/rd
 ipset=/proton.me/rd
 ipset=/nerdvpn.de/rd
