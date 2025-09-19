@@ -7,7 +7,7 @@ paripartners
 marathon
 pm[-][0-9]
 fbmetrix
-[ck]?a[sz]+[iy]no?
+[ck]?a[sz]+[iy]+no?
 [vw]+[uyo0]*[l1]+[ck]?a?n?
 slots?
 nar[ck]
@@ -22,7 +22,7 @@ igr[aoy]?
 ol[iy]mp
 p[o0]c?ker
 leon
-jack-?pot
+jack[-]?pot
 spin
 lott?o
 bcity
@@ -105,7 +105,6 @@ mp3
 [ck]ompro
 osmotr
 zerkal
-xn--+
 rutor
 torr
 tracker
@@ -138,7 +137,7 @@ live
 mega
 tion
 finan[cs]
-in-?up
+in[-]?up
 [ck]apital
 star
 gold
@@ -146,14 +145,17 @@ gold
 ^bs2
 vegas
 [vw][oa][vw]ad
-xn[-][-]p1ai
 profit
 birds
 kraken
 feya
 flibusta
 cheki
+[ck]rypt[oa]
 github
+tu[.]?be
+xn[-][-]p1ai
+[а-я]
 #lord
 ^[0-9]{4,}|[0-9]{4,}\.|-[0-9]+|[0-9]+-
 \.(best|biz|buzz|center|cfd|click|cloud|date|guru|host|fm|fun|icu|love|me|ml|mobi|monster|party|pro|quest|sbs|site|space|one|online|top|life|rocks|website|win|world|xyz|vip)$
