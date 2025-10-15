@@ -106,6 +106,14 @@ if [ -n "$1" ]; then
 fi
 [ -f "$CONFIG_FILE" ] && . "$CONFIG_FILE"
 
+Generate_ZI_ALL_URL() {
+    _urls=""
+    for i in $(seq -w 0 19); do
+        _urls="${_urls:+$_urls }$1/dump-$i.csv$2"
+    done
+    export ZI_ALL_URL="$_urls"
+}
+
 ### Blacklist sources
 ## rublacklist
 export RBL_ALL_URL="https://reestr.rublacklist.net/api/v3/snapshot/"
@@ -113,11 +121,9 @@ export RBL_IP_URL="https://reestr.rublacklist.net/api/v3/ips/"
 export RBL_DPI_URL="https://reestr.rublacklist.net/api/v3/dpi/"
 export RBL_ENCODING=""
 ## zapret-info
-ZI_GH_URL="https://raw.githubusercontent.com/zapret-info/z-i/master"
-export ZI_ALL_URL="$ZI_GH_URL/dump.csv.gz"
-#export ZI_ALL_URL="$ZI_GH_URL/dump-00.csv $ZI_GH_URL/dump-01.csv $ZI_GH_URL/dump-02.csv $ZI_GH_URL/dump-03.csv $ZI_GH_URL/dump-04.csv $ZI_GH_URL/dump-05.csv $ZI_GH_URL/dump-06.csv $ZI_GH_URL/dump-07.csv $ZI_GH_URL/dump-08.csv $ZI_GH_URL/dump-09.csv $ZI_GH_URL/dump-10.csv $ZI_GH_URL/dump-11.csv $ZI_GH_URL/dump-12.csv $ZI_GH_URL/dump-13.csv $ZI_GH_URL/dump-14.csv $ZI_GH_URL/dump-15.csv $ZI_GH_URL/dump-16.csv $ZI_GH_URL/dump-17.csv $ZI_GH_URL/dump-18.csv $ZI_GH_URL/dump-19.csv"
-#ZI_SF_URL="https://sourceforge.net/p/zapret-info/code/HEAD/tree"
-#export ZI_ALL_URL="$ZI_SF_URL/dump-00.csv?format=raw $ZI_SF_URL/dump-01.csv?format=raw $ZI_SF_URL/dump-02.csv?format=raw $ZI_SF_URL/dump-03.csv?format=raw $ZI_SF_URL/dump-04.csv?format=raw $ZI_SF_URL/dump-05.csv?format=raw $ZI_SF_URL/dump-06.csv?format=raw $ZI_SF_URL/dump-07.csv?format=raw $ZI_SF_URL/dump-08.csv?format=raw $ZI_SF_URL/dump-09.csv?format=raw $ZI_SF_URL/dump-10.csv?format=raw $ZI_SF_URL/dump-11.csv?format=raw $ZI_SF_URL/dump-12.csv?format=raw $ZI_SF_URL/dump-13.csv?format=raw $ZI_SF_URL/dump-14.csv?format=raw $ZI_SF_URL/dump-15.csv?format=raw $ZI_SF_URL/dump-16.csv?format=raw $ZI_SF_URL/dump-17.csv?format=raw $ZI_SF_URL/dump-18.csv?format=raw $ZI_SF_URL/dump-19.csv?format=raw"
+#ZI_GH_URL="https://raw.githubusercontent.com/zapret-info/z-i/master"
+#export ZI_ALL_URL="$ZI_GH_URL/dump.csv.gz"
+ZI_SF_URL="https://sourceforge.net/p/zapret-info/code/HEAD/tree"
 #export ZI_ALL_URL="https://app.assembla.com/spaces/z-i/git/source/master/dump.csv?_format=raw"
 export ZI_ENCODING="CP1251"
 ## antifilter
@@ -125,8 +131,12 @@ export AF_IP_URL="https://antifilter.download/list/allyouneed.lst"
 export AF_FQDN_URL="https://antifilter.download/list/domains.lst"
 export AF_ENCODING=""
 ## fz
-export FZ_URL="https://raw.githubusercontent.com/fz139/vigruzki/main/dump.xml.00 https://raw.githubusercontent.com/fz139/vigruzki/main/dump.xml.01 https://raw.githubusercontent.com/fz139/vigruzki/main/dump.xml.02"
+FZ_GH_URL="https://raw.githubusercontent.com/fz139/vigruzki/main"
+export FZ_URL="$FZ_GH_URL/dump.xml.00 $FZ_GH_URL/dump.xml.01 $FZ_GH_URL/dump.xml.02"
 export FZ_ENCODING="CP1251"
+
+[ -n "$ZI_GH_URL" ] && [ -z "$ZI_ALL_URL" ] && Generate_ZI_ALL_URL "$ZI_GH_URL"
+[ -n "$ZI_SF_URL" ] && [ -z "$ZI_ALL_URL" ] && Generate_ZI_ALL_URL "$ZI_SF_URL" "?format=raw"
 
 ### Blacklist presets
 case "$BLLIST_PRESET" in
