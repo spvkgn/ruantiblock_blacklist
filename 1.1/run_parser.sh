@@ -55,7 +55,7 @@ BLLIST_MODULE="${MODULES_DIR}/ruab_parser.py"
 
 ############################## Parsers #################################
 
-### Режим обхода блокировок: zapret-info-fqdn, zapret-info-ip, rublacklist-fqdn, rublacklist-ip, antifilter-ip, fz-fqdn, fz-ip
+### Режим обхода блокировок: zapret-info-ip, zapret-info-fqdn, zapret-info-fqdn-only, rublacklist-ip, rublacklist-fqdn, rublacklist-fqdn-only, antifilter-ip, antifilter-fqdn, antifilter-fqdn-only, fz-ip, fz-fqdn, fz-fqdn-only
 export BLLIST_PRESET=""
 ### В случае если из источника получено менее указанного кол-ва записей, то обновления списков не происходит
 export BLLIST_MIN_ENTRIES=30000
@@ -97,6 +97,10 @@ export BLLIST_FQDN_FILTER_FILE="${CONFIG_DIR}/fqdn_filter"
 export BLLIST_FQDN_EXCLUDED_ENABLE=0
 ### Файл с записями FQDN для опции BLLIST_FQDN_EXCLUDED_ENABLE
 export BLLIST_FQDN_EXCLUDED_FILE="${CONFIG_DIR}/fqdn_excluded"
+### Включение опции исключения записей определённых гос.органов из блэклиста
+export BLLIST_ORG_EXCLUDED_ENABLE=0
+### Файл с записями для опции BLLIST_ORG_EXCLUDED_ENABLE
+export BLLIST_ORG_EXCLUDED_FILE="${CONFIG_DIR}/org_excluded"
 ### Обрезка www[0-9]. в FQDN (0 - off, 1 - on)
 export BLLIST_STRIP_WWW=1
 ### Преобразование кириллических доменов в punycode (0 - off, 1 - on)
@@ -135,7 +139,9 @@ ZI_SF_URL="https://sourceforge.net/p/zapret-info/code/HEAD/tree"
 #export ZI_ALL_URL="https://app.assembla.com/spaces/z-i/git/source/master/dump.csv?_format=raw"
 export ZI_ENCODING="CP1251"
 ## antifilter
-export AF_IP_URL="https://antifilter.download/list/allyouneed.lst"
+export AF_IP_FULL_URL="https://antifilter.download/list/ipresolve.lst"
+export AF_IP_URL="https://antifilter.download/list/ip.lst"
+export AF_NET_URL="https://antifilter.download/list/subnet.lst"
 export AF_FQDN_URL="https://antifilter.download/list/domains.lst"
 export AF_ENCODING=""
 ## fz
@@ -151,12 +157,16 @@ case "$BLLIST_PRESET" in
     zapret-info-ip)
         ### Источник для обновления списка блокировок (zapret-info, rublacklist, antifilter, fz, ruantiblock)
         export BLLIST_SOURCE="zapret-info"
-        ### Режим обхода блокировок: ip, fqdn
+        ### Режим обхода блокировок: ip, fqdn, fqdn-only
         export BLLIST_MODE="ip"
     ;;
     zapret-info-fqdn)
         export BLLIST_SOURCE="zapret-info"
         export BLLIST_MODE="fqdn"
+    ;;
+    zapret-info-fqdn-only)
+        export BLLIST_SOURCE="zapret-info"
+        export BLLIST_MODE="fqdn-only"
     ;;
     rublacklist-ip)
         export BLLIST_SOURCE="rublacklist"
@@ -166,9 +176,21 @@ case "$BLLIST_PRESET" in
         export BLLIST_SOURCE="rublacklist"
         export BLLIST_MODE="fqdn"
     ;;
+    rublacklist-fqdn-only)
+        export BLLIST_SOURCE="rublacklist"
+        export BLLIST_MODE="fqdn-only"
+    ;;
     antifilter-ip)
         export BLLIST_SOURCE="antifilter"
         export BLLIST_MODE="ip"
+    ;;
+    antifilter-fqdn)
+        export BLLIST_SOURCE="antifilter"
+        export BLLIST_MODE="fqdn"
+    ;;
+    antifilter-fqdn-only)
+        export BLLIST_SOURCE="antifilter"
+        export BLLIST_MODE="fqdn-only"
     ;;
     fz-ip)
         export BLLIST_SOURCE="fz"
@@ -177,6 +199,10 @@ case "$BLLIST_PRESET" in
     fz-fqdn)
         export BLLIST_SOURCE="fz"
         export BLLIST_MODE="fqdn"
+    ;;
+    fz-fqdn-only)
+        export BLLIST_SOURCE="fz"
+        export BLLIST_MODE="fqdn-only"
     ;;
     *)
         export BLLIST_SOURCE=""
