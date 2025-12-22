@@ -21,6 +21,5 @@ ipset=/rutracker.net/rd
 ipset=/rutracker.nl/rd
 ipset=/rutracker.cc/rd
 ipset=/vpngate.net/rd
-ipset=/ntc.party/rd
 ipset=/proton.me/rd
 ipset=/nerdvpn.de/rd
