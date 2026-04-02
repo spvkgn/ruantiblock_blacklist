@@ -16,7 +16,6 @@ ipset=/xxfbcdn.net/rd
 ipset=/internalfb.com/rd
 ipset=/whatsapp.com/rd
 ipset=/whatsapp.net/rd
-ipset=/torproject.org/rd
 ipset=/vpngate.net/rd
 ipset=/proton.me/rd
 ipset=/nerdvpn.de/rd
